@@ -16,26 +16,14 @@ public class BulksmsSmsSenderServiceProvider extends FullSmsSenderAbstractServic
     public static final String CONFIG_API_SERVER = "url";
     public static final String CONFIG_API_USERNAME = "username";
     public static final String CONFIG_API_PASSWORD = "password";
-    public static final String CONFIG_FROM = "from";
 
     private static final Logger logger = Logger.getLogger(BulksmsSmsSenderServiceProvider.class);
 
     private final String url;
     private final String username;
     private final String password;
-    private final String from;
 
     public class BulksmsMessage {
-        String from;
-
-        public String getFrom() {
-            return from;
-        }
-
-        public void setFrom(String from) {
-            this.from = from;
-        }
-
         String to;
 
         public String getTo() {
@@ -56,21 +44,9 @@ public class BulksmsSmsSenderServiceProvider extends FullSmsSenderAbstractServic
             this.body = body;
         }
 
-        String unicode;
-
-        public String getUnicode() {
-            return unicode;
-        }
-
-        public void setUnicode(String unicode) {
-            this.unicode = unicode;
-        }
-
-        public BulksmsMessage(String from, String to, String body) {
-            this.from = from;
+        public BulksmsMessage(String to, String body) {
             this.to = to;
             this.body = body;
-            this.unicode = "UNICODE";
         }
     }
 
@@ -81,14 +57,13 @@ public class BulksmsSmsSenderServiceProvider extends FullSmsSenderAbstractServic
         this.url = configUrl != null ? configUrl : "https://api.bulksms.com/v1/messages";
         this.username = config.get(CONFIG_API_USERNAME);
         this.password = config.get(CONFIG_API_PASSWORD);
-        this.from = config.get(CONFIG_FROM);
     }
 
     @Override
     public void sendMessage(String phoneNumber, String message) throws MessageSendException {
         HttpClient httpclient = HttpClients.createDefault();
         SimpleHttp req = SimpleHttp.doPost(url, httpclient);
-        req.json(new BulksmsMessage[] { new BulksmsMessage(this.from, phoneNumber, message) });
+        req.json(new BulksmsMessage[] { new BulksmsMessage(phoneNumber, message) });
         req.authBasic(this.username, this.password);
         try {
             SimpleHttp.Response res = req.asResponse();
